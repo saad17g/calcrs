@@ -7,7 +7,7 @@ pub enum Expression {
     UnaryOp(Token, Box<Expression>),
 }
 
-pub fn parse(tokens: &[Token]) -> Result<Expression, String> {
+pub fn parse(tokens: &Vec<Token>) -> Result<Expression, String> {
     let mut iter = tokens.iter().peekable();
     parse_expression(&mut iter)
 }
@@ -55,11 +55,16 @@ fn parse_factor(
 ) -> Result<Expression, String> {
     match iter.next() {
         Some(Token::Number(val)) => Ok(Expression::Number(*val)),
+        Some(Token::Minus) => {
+            let expr = parse_factor(iter)?;
+            Ok(Expression::UnaryOp(Token::Minus, Box::new(expr)))
+        }
+
         Some(Token::LeftParen) => {
             let expr = parse_expression(iter)?;
             match iter.next() {
                 Some(Token::RightParen) => Ok(expr),
-                _ => Err(String::from("Expected right parenthesis")),
+                _ => Err(String::from("Expected right parenthese")),
             }
         }
         Some(Token::Cos) => parse_unary_op(iter, Token::Cos),
@@ -79,19 +84,21 @@ fn parse_unary_op(
     iter: &mut std::iter::Peekable<std::slice::Iter<Token>>,
     op: Token,
 ) -> Result<Expression, String> {
-    match iter.next() {
-        Some(Token::LeftParen) => {
-            let expr = parse_expression(iter)?;
-            match iter.next() {
-                Some(Token::RightParen) => Ok(Expression::UnaryOp(op, Box::new(expr))),
-                _ => Err(String::from(
-                    "Expected right parenthesis after unary operation",
-                )),
-            }
+    match op {
+        Token::Minus => {
+            let expr = parse_factor(iter)?;
+            Ok(Expression::UnaryOp(op, Box::new(expr)))
         }
-        _ => Err(String::from(
-            "Expected left parenthesis after unary operation",
-        )),
+        _ => match iter.next() {
+            Some(Token::LeftParen) => {
+                let expr = parse_expression(iter)?;
+                match iter.next() {
+                    Some(Token::RightParen) => Ok(Expression::UnaryOp(op, Box::new(expr))),
+                    _ => Err(String::from("Expected right parenthese")),
+                }
+            }
+            _ => Err(String::from("Expected left parenthese")),
+        },
     }
 }
 
@@ -109,19 +116,13 @@ fn parse_binary_op(
                         Some(Token::RightParen) => {
                             Ok(Expression::BinaryOp(Box::new(left), op, Box::new(right)))
                         }
-                        _ => Err(String::from(
-                            "Expected right parenthesis after binary operation",
-                        )),
+                        _ => Err(String::from("Expected right parenthese")),
                     }
                 }
-                _ => Err(String::from(
-                    "Expected comma after first argument of binary operation",
-                )),
+                _ => Err(String::from("Expected comma")),
             }
         }
-        _ => Err(String::from(
-            "Expected left parenthesis after binary operation",
-        )),
+        _ => Err(String::from("Expected left parenthese")),
     }
 }
 
@@ -182,5 +183,96 @@ mod tests {
 
         let ast = parse(&tokens).unwrap();
         assert_eq!(ast, expected_ast);
+    }
+
+    #[test]
+    fn test_parse_nested_expressions() {
+        let input = "((1 + 2) * 3 - (4 / 2)) * (5 + 6)";
+        let tokens = tokenize(input);
+        let expected_ast = Expression::BinaryOp(
+            Box::new(Expression::BinaryOp(
+                Box::new(Expression::BinaryOp(
+                    Box::new(Expression::BinaryOp(
+                        Box::new(Expression::Number(1.0)),
+                        Token::Plus,
+                        Box::new(Expression::Number(2.0)),
+                    )),
+                    Token::Multiply,
+                    Box::new(Expression::Number(3.0)),
+                )),
+                Token::Minus,
+                Box::new(Expression::BinaryOp(
+                    Box::new(Expression::Number(4.0)),
+                    Token::Divide,
+                    Box::new(Expression::Number(2.0)),
+                )),
+            )),
+            Token::Multiply,
+            Box::new(Expression::BinaryOp(
+                Box::new(Expression::Number(5.0)),
+                Token::Plus,
+                Box::new(Expression::Number(6.0)),
+            )),
+        );
+
+        let ast = parse(&tokens).unwrap();
+        assert_eq!(ast, expected_ast);
+    }
+
+    #[test]
+    fn test_parse_multiple_unary_ops() {
+        let input = "sin(cos(tan(0.5)))";
+        let tokens = tokenize(input);
+        let expected_ast = Expression::UnaryOp(
+            Token::Sin,
+            Box::new(Expression::UnaryOp(
+                Token::Cos,
+                Box::new(Expression::UnaryOp(
+                    Token::Tan,
+                    Box::new(Expression::Number(0.5)),
+                )),
+            )),
+        );
+
+        let ast = parse(&tokens).unwrap();
+        assert_eq!(ast, expected_ast);
+    }
+
+    #[test]
+    fn test_parse_binary_op_pow_with_expressions() {
+        let input = "pow(2 + 3, 4 - 1)";
+        let tokens = tokenize(input);
+        let expected_ast = Expression::BinaryOp(
+            Box::new(Expression::BinaryOp(
+                Box::new(Expression::Number(2.0)),
+                Token::Plus,
+                Box::new(Expression::Number(3.0)),
+            )),
+            Token::Pow,
+            Box::new(Expression::BinaryOp(
+                Box::new(Expression::Number(4.0)),
+                Token::Minus,
+                Box::new(Expression::Number(1.0)),
+            )),
+        );
+
+        let ast = parse(&tokens).unwrap();
+        assert_eq!(ast, expected_ast);
+    }
+
+    #[test]
+    fn test_parse_invalid_expression() {
+        let input = "1 + (2 * 3";
+        let tokens = tokenize(input);
+        let result = parse(&tokens);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_parse_empty_input() {
+        let input = "";
+        let tokens = tokenize(input);
+        let result = parse(&tokens);
+        assert!(result.is_err());
     }
 }
