@@ -1,3 +1,24 @@
+//! # Parser Module
+//!
+//! This module provides functionality for parsing the tokenized expression into an abstract syntax tree (AST).
+//!
+//! ## Expression
+//!
+//! The `Expression` enum represents the different types of expressions in the AST:
+//!
+//! - `Number`: Represents a numeric value.
+//! - `BinaryOp`: Represents a binary operation with a left operand, an operator, and a right operand.
+//! - `UnaryOp`: Represents a unary operation with an operator and an operand.
+//!
+//! ## Functions
+//!
+//! - `parse(tokens: &Vec<Token>) -> Result<Expression, String>`: Parses the tokens into an AST.
+//! - `parse_expression(iter: &mut std::iter::Peekable<std::slice::Iter<Token>>) -> Result<Expression, String>`: Parses an expression.
+//! - `parse_term(iter: &mut std::iter::Peekable<std::slice::Iter<Token>>) -> Result<Expression, String>`: Parses a term.
+//! - `parse_factor(iter: &mut std::iter::Peekable<std::slice::Iter<Token>>) -> Result<Expression, String>`: Parses a factor.
+//! - `parse_unary_op(iter: &mut std::iter::Peekable<std::slice::Iter<Token>>, op: Token) -> Result<Expression, String>`: Parses a unary operation.
+//! - `parse_binary_op(iter: &mut std::iter::Peekable<std::slice::Iter<Token>>, op: Token) -> Result<Expression, String>`: Parses a binary operation.
+
 use crate::lexer::Token;
 
 #[derive(Debug, PartialEq)]

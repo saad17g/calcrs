@@ -1,10 +1,49 @@
+//! # Command Line Calculator
+//!
+//! This is a command line calculator application written in Rust.
+//! It evaluates mathematical expressions provided as command line arguments.
+//!
+//! ## Usage
+//!
+//! ```
+//! calcrs <expression>
+//! ```
+//!
+//! - `<expression>`: The mathematical expression to evaluate.
+//!
+//! ## Examples
+//!
+//! ```
+//! calcrs "2 + 3 * 4"
+//! calcrs "sin(0.5) * (1 + 2)"
+//! calcrs "sqrt(16) / 2"
+//! ```
+//!
+//! ## Error Handling
+//!
+//! The application handles the following error cases:
+//!
+//! - Invalid number of command line arguments
+//! - Parsing errors in the expression
+//! - Division by zero during evaluation
+//! - Invalid mathematical operations
+//!
+//! In case of an error, an appropriate error message is displayed, and the application exits with a non-zero status code.
+//!
+//! ## Modules
+//!
+//! The application consists of the following modules:
+//!
+//! - `lexer`: Tokenizes the input expression into individual tokens.
+//! - `parser`: Parses the tokens into an abstract syntax tree (AST).
+//! - `evaluator`: Evaluates the AST and computes the result.
+
 use std::env;
 use std::process;
 
 mod evaluator;
 mod lexer;
 mod parser;
-
 fn main() {
     let args: Vec<String> = env::args().collect();
 

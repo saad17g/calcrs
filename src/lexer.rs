@@ -1,3 +1,32 @@
+//! # Lexer Module
+//!
+//! This module provides functionality for tokenizing the input expression.
+//!
+//! ## Tokens
+//!
+//! The following tokens are supported:
+//!
+//! - `Number`: Represents a numeric value.
+//! - `Plus`: Represents the addition operator (`+`).
+//! - `Minus`: Represents the subtraction operator (`-`).
+//! - `Multiply`: Represents the multiplication operator (`*`).
+//! - `Divide`: Represents the division operator (`/`).
+//! - `LeftParen`: Represents a left parenthesis (`(`).
+//! - `RightParen`: Represents a right parenthesis (`)`).
+//! - `Cos`: Represents the cosine function.
+//! - `Acos`: Represents the arccosine function.
+//! - `Sin`: Represents the sine function.
+//! - `Asin`: Represents the arcsine function.
+//! - `Tan`: Represents the tangent function.
+//! - `Atan`: Represents the arctangent function.
+//! - `Sqrt`: Represents the square root function.
+//! - `Pow`: Represents the exponentiation function.
+//! - `Comma`: Represents a comma separator (`,`).
+//!
+//! ## Functions
+//!
+//! - `tokenize(input: &str) -> Vec<Token>`: Tokenizes the input expression into a vector of tokens.
+
 #[derive(Debug, PartialEq, Clone)]
 pub enum Token {
     Number(f64),

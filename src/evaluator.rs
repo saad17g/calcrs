@@ -1,3 +1,17 @@
+//! # Evaluator Module
+//!
+//! This module provides functionality for evaluating the abstract syntax tree (AST) and computing the result.
+//!
+//! ## Errors
+//!
+//! The `EvaluationError` enum represents the possible errors that can occur during evaluation:
+//!
+//! - `DivisionByZero`: Indicates an attempt to divide by zero.
+//! - `InvalidOperation`: Indicates an invalid mathematical operation.
+//!
+//! ## Functions
+//!
+//! - `evaluate(ast: Expression) -> Result<f64, EvaluationError>`: Evaluates the AST and computes the result.
 use crate::lexer::Token;
 use crate::parser::Expression;
 
